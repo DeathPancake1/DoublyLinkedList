@@ -34,15 +34,49 @@ DoublyLinkedList* init()
 DoublyLinkedList* convertArrayToDoublyLinkedList(int array[], int size)
 {
     DoublyLinkedList *list = init();
-    /* TODO: ADD YOUR CODE HERE */
+    Node *first=malloc(sizeof(Node));
+    first->data=array[0];
+    list->head=first;
+    list->tail=first;
+    for(int i=1;i<size;i++){
+        append(list,array[i]);
+    }
+    list->head->prev=NULL;
+    list->tail->next=NULL;
     return list;
+}
+/*
+ * append
+ */
+void append(DoublyLinkedList* list,int x){
+    Node *temp = malloc(sizeof(Node));
+    temp->data=x;
+    if(!list->head){
+        list->head=temp;
+        list->tail=temp;
+        list->head->prev=NULL;
+        list->tail->next=NULL;
+    }
+    else{
+        list->tail->next=temp;
+        temp->prev=list->tail;
+        list->tail=temp;
+        list->tail->next=NULL;
+    }
 }
 /*
  * destroy
  */
 void destroy(DoublyLinkedList* list)
 {
-    /* TODO: ADD YOUR CODE HERE */
+    Node *temp;
+    while(list->head){
+        temp=list->head;
+        list->head=list->head->next;
+        free(temp);
+    }
+    list->head=NULL;
+    list->tail=NULL;
 }
 /*
  * copy: copy list into a new list and return the new one.
@@ -50,7 +84,11 @@ void destroy(DoublyLinkedList* list)
 DoublyLinkedList* copy(DoublyLinkedList* list)
 {
     DoublyLinkedList *newlist = init();
-    /* TODO: ADD YOUR CODE HERE */
+    Node *head=list->head;
+    while(head){
+        append(newlist,head->data);
+        head=head->next;
+    }
     return newlist;
 }
 /*
@@ -58,7 +96,24 @@ DoublyLinkedList* copy(DoublyLinkedList* list)
  */
 void concatenate(DoublyLinkedList*  list1, DoublyLinkedList*  list2)
 {
-    /* TODO: ADD YOUR CODE HERE */
+    if((!list1->head&&!list2->head)||(!list2->head)){
+        return;
+    }
+    else if(!list1->head){
+        Node *ptr2=list2->head;
+        while(ptr2){
+            append(list1,ptr2->data);
+            ptr2=ptr2->next;
+        }
+    }
+    else{
+        Node *head=malloc(sizeof(Node));
+        head=list2->head;
+        while(head){
+            append(list1,head->data);
+            head=head->next;
+        }
+    }
 }
 /*
  * getDifferenceBetweenLists: get all elements in the first list that don't exist in  the second one.
@@ -66,16 +121,51 @@ void concatenate(DoublyLinkedList*  list1, DoublyLinkedList*  list2)
 DoublyLinkedList* getDifferenceBetweenLists(DoublyLinkedList*  list1, DoublyLinkedList*  list2)
 {
     DoublyLinkedList *newlist = init();
-    /* TODO: ADD YOUR CODE HERE */
+    Node *ptr1=list1->head;
+    while(ptr1){
+        int found=0;
+        Node *ptr2=list2->head;
+        while(ptr2){
+            if(ptr1->data==ptr2->data){
+                found=1;
+            }
+            ptr2=ptr2->next;
+        }
+        if(found==0){
+            append(newlist,ptr1->data);
+        }
+        ptr1=ptr1->next;
+    }
     return newlist;
 }
 /*
  * checkSumofFirstHalfEqualSumOfSecondHalf: check  if sum of first n/2 elements equals sum of the last n/2 elements.
  */
+size_t length(DoublyLinkedList*  list);
 int checkSumofFirstHalfEqualSumOfSecondHalf(DoublyLinkedList*  list)
 {
-    /* TODO: ADD YOUR CODE HERE */
-    return -1;
+    int equal = 0,sum1=0,sum2=0;
+    if(length(list)%2==1){
+        return equal;
+    }
+    else{
+        int count=0;
+        Node *ptr=list->head;
+        while(count<length(list)){
+            if(count<length(list)/2){
+                sum1=sum1+ptr->data;
+            }
+            else{
+                sum2=sum2+ptr->data;
+            }
+            count++;
+            ptr=ptr->next;
+        }
+    }
+    if(sum1==sum2){
+        equal=1;
+    }
+    return equal;
 }
 /*
  * length: count the number of items stored in the list
@@ -83,7 +173,11 @@ int checkSumofFirstHalfEqualSumOfSecondHalf(DoublyLinkedList*  list)
 size_t length(DoublyLinkedList*  list)
 {
     size_t count = 0;
-    /* TODO: ADD YOUR CODE HERE */
+    Node*temp=list->head;
+    while(temp){
+        count++;
+        temp=temp->next;
+    }
     return count;
 }
 /*
@@ -95,8 +189,18 @@ size_t length(DoublyLinkedList*  list)
  */
 int isPalindrome(DoublyLinkedList * list)
 {
-    /* TODO: ADD YOUR CODE HERE */
-    return -1;
+    int palindrome=0;
+    int array[length(list)];
+    Node *ptr=list->tail;
+    for(int i=0;i<length(list);i++){
+        array[i]=ptr->data;
+        ptr=ptr->prev;
+    }
+    DoublyLinkedList *temp=convertArrayToDoublyLinkedList(array,length(list));
+    if(areEqual(temp,list)){
+        palindrome=1;
+    }
+    return palindrome;
 }
 /*
  * areEqual: returns 1 if both lists contain same elements
@@ -104,8 +208,18 @@ int isPalindrome(DoublyLinkedList * list)
  */
 int areEqual(DoublyLinkedList*  list1, DoublyLinkedList*  list2)
 {
-    /* TODO: ADD YOUR CODE HERE */
-    return -1;
+    int equal=0;
+    if(length(list1)==length(list2)){
+        equal = 1;
+        Node *ptr1=list1->head,*ptr2=list2->head;
+        while(ptr1&&ptr2){
+            if(ptr1->data!=ptr2->data){
+                equal = 0;
+            }
+            ptr1=ptr1->next;ptr2=ptr2->next;
+        }
+    }
+    return equal;
 }
 /*
  * printlnListForward: prints the list {1, 3, 5, 7} as 1 3 5 7
@@ -113,7 +227,11 @@ int areEqual(DoublyLinkedList*  list1, DoublyLinkedList*  list2)
  */
 void printlnListForward(DoublyLinkedList * list)
 {
-    /* TODO: ADD YOUR CODE HERE */
+    Node *ptr=list->head;
+    while(ptr){
+        printf("%d ",ptr->data);
+        ptr=ptr->next;
+    }
     printf("\n");
 }
 /*
@@ -122,7 +240,11 @@ void printlnListForward(DoublyLinkedList * list)
  */
 void printlnListBackward(DoublyLinkedList * list)
 {
-    /* TODO: ADD YOUR CODE HERE */
+    Node *ptr=list->tail;
+    while(ptr){
+        printf("%d ",ptr->data);
+        ptr=ptr->prev;
+    }
     printf("\n");
 }
 /*
