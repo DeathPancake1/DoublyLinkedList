@@ -122,19 +122,23 @@ DoublyLinkedList* getDifferenceBetweenLists(DoublyLinkedList*  list1, DoublyLink
 {
     DoublyLinkedList *newlist = init();
     Node *ptr1=list1->head;
-    while(ptr1){
-        int found=0;
-        Node *ptr2=list2->head;
-        while(ptr2){
-            if(ptr1->data==ptr2->data){
-                found=1;
-            }
+    Node *ptr2=list2->head;
+    while(ptr1&&ptr2){
+        if(ptr1->data==ptr2->data){
+            ptr1=ptr1->next;
             ptr2=ptr2->next;
         }
-        if(found==0){
-            append(newlist,ptr1->data);
+        else if(ptr1->data>ptr2->data){
+            while(ptr1->data>ptr2->data){
+                ptr2=ptr2->next;
+            }
         }
-        ptr1=ptr1->next;
+        else{
+            while(ptr1->data<ptr2->data){
+                append(newlist,ptr1->data);
+                ptr1=ptr1->next;
+            }
+        }
     }
     return newlist;
 }
@@ -190,6 +194,9 @@ size_t length(DoublyLinkedList*  list)
 int isPalindrome(DoublyLinkedList * list)
 {
     int palindrome=0;
+    if(list->head==NULL){
+        return 1;
+    }
     int array[length(list)];
     Node *ptr=list->tail;
     for(int i=0;i<length(list);i++){
